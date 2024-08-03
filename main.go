@@ -5,8 +5,9 @@ import (
 	"time"
 )
 
-func greetOne() {
+func greetOne(done chan bool) {
 	fmt.Println("Greet 1 function called!")
+	done <- true
 }
 
 func slowGreet(done chan bool) {
@@ -15,21 +16,29 @@ func slowGreet(done chan bool) {
 	done <- true
 }
 
-func greetTwo() {
+func greetTwo(done chan bool) {
 	fmt.Println("Greet 2 invoked!")
+	done <- true
 }
 
-func greetThree() {
+func greetThree(done chan bool) {
 	fmt.Println("Greet 3 invoked!")
+	done <- true
 }
 
 func main() {
 
-	//	go greetOne()
-	done := make(chan bool)
+	done := make(chan bool) // We can use one channel for multiple go routines, however we need to read the channels
+	// for all the number of times go routines is invokek i.e. 4 times in this example to avoid the kind of race condition
+
+	go greetOne(done)
 	go slowGreet(done)
+	go greetTwo(done)
+	go greetThree(done)
+
 	<-done
-	//greetTwo()
-	//	go greetThree()
+	<-done
+	<-done
+	<-done
 
 }
