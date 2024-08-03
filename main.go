@@ -28,17 +28,25 @@ func greetThree(done chan bool) {
 
 func main() {
 
-	done := make(chan bool) // We can use one channel for multiple go routines, however we need to read the channels
+	//done := make(chan bool) // We can use one channel for multiple go routines, however we need to read the channels
 	// for all the number of times go routines is invokek i.e. 4 times in this example to avoid the kind of race condition
 
-	go greetOne(done)
-	go slowGreet(done)
-	go greetTwo(done)
-	go greetThree(done)
+	dones := make([]chan bool, 4)
 
-	<-done
-	<-done
-	<-done
-	<-done
+	dones[0] = make(chan bool)
+	go greetOne(dones[0])
+
+	dones[1] = make(chan bool)
+	go slowGreet(dones[1])
+
+	dones[2] = make(chan bool)
+	go greetTwo(dones[2])
+
+	dones[3] = make(chan bool)
+	go greetThree(dones[3])
+
+	for _, done := range dones {
+		<-done
+	}
 
 }
